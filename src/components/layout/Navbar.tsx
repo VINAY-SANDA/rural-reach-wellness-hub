@@ -1,11 +1,12 @@
 
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Menu, Bell, Moon, Sun, User } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Menu, Bell, Moon, Sun, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { toast } from '@/hooks/use-toast';
 
 interface NavbarProps {
   toggleSidebar: () => void;
@@ -13,12 +14,57 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ toggleSidebar }) => {
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   const [theme, setTheme] = React.useState<'light' | 'dark'>('light');
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    const role = localStorage.getItem('userRole');
+    setUserRole(role);
+  }, []);
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
     setTheme(newTheme);
     document.documentElement.classList.toggle('dark');
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('userRole');
+    
+    toast({
+      title: "Logged out successfully",
+      description: "You have been logged out of your account.",
+    });
+    
+    navigate('/login');
+  };
+
+  const getRoleDisplay = () => {
+    switch (userRole) {
+      case 'patient':
+        return 'Patient';
+      case 'doctor':
+        return 'Doctor';
+      case 'community':
+        return 'Service Provider';
+      default:
+        return 'User';
+    }
+  };
+
+  const getAvatarFallback = () => {
+    switch (userRole) {
+      case 'patient':
+        return 'P';
+      case 'doctor':
+        return 'D';
+      case 'community':
+        return 'SP';
+      default:
+        return 'U';
+    }
   };
 
   return (
@@ -43,12 +89,18 @@ const Navbar: React.FC<NavbarProps> = ({ toggleSidebar }) => {
           {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
         </Button>
         
+        {userRole && (
+          <span className="hidden md:inline-block text-sm font-medium mr-2 text-muted-foreground">
+            Logged in as {getRoleDisplay()}
+          </span>
+        )}
+        
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
               <Avatar className="h-8 w-8">
                 <AvatarImage src="/placeholder.svg" alt="User" />
-                <AvatarFallback>U</AvatarFallback>
+                <AvatarFallback>{getAvatarFallback()}</AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
@@ -59,7 +111,9 @@ const Navbar: React.FC<NavbarProps> = ({ toggleSidebar }) => {
             <DropdownMenuItem>
               <Link to="/settings" className="w-full">Settings</Link>
             </DropdownMenuItem>
-            <DropdownMenuItem>Sign out</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
+              <LogOut className="mr-2 h-4 w-4" /> Sign out
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
