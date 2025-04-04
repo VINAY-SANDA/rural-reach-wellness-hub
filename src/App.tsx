@@ -21,15 +21,47 @@ import RegisterPage from "./pages/RegisterPage";
 import HealthProgramsPage from "./pages/HealthProgramsPage";
 import ProfilePage from "./pages/ProfilePage";
 import { useEffect, useState } from "react";
+import { supabase, initializeDatabase } from "./lib/supabase";
 
 const queryClient = new QueryClient();
 
+// AuthGuard component to handle protected routes
 const ProtectedRoute = ({ children, allowedRoles = null }: { children: React.ReactNode, allowedRoles?: string[] | null }) => {
-  // Check if user is authenticated using Supabase
-  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-  const userRole = localStorage.getItem('userRole');
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   
-  if (!isLoggedIn) {
+  useEffect(() => {
+    const checkAuth = async () => {
+      // Check if user is authenticated with Supabase
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session) {
+        setIsAuthenticated(true);
+        
+        // Get user role from profile
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('user_id', session.user.id)
+          .single();
+        
+        if (profile) {
+          setUserRole(profile.role);
+        }
+      }
+      
+      setIsLoading(false);
+    };
+    
+    checkAuth();
+  }, []);
+  
+  if (isLoading) {
+    return <div className="flex justify-center items-center h-screen">Loading...</div>;
+  }
+  
+  if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
   
@@ -51,12 +83,17 @@ const App = () => {
   const [isInitialized, setIsInitialized] = useState(false);
   
   useEffect(() => {
-    // Check for stored authentication data on initial load
-    setIsInitialized(true);
+    // Initialize the database when the app starts
+    const init = async () => {
+      await initializeDatabase();
+      setIsInitialized(true);
+    };
+    
+    init();
   }, []);
   
   if (!isInitialized) {
-    return null; // Or a loading spinner
+    return <div className="flex justify-center items-center h-screen">Initializing...</div>;
   }
 
   return (

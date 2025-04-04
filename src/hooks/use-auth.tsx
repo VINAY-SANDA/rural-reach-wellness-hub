@@ -96,7 +96,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         password,
       });
       
-      if (error) throw error;
+      if (error) {
+        const customError = new Error(error.message);
+        (customError as any).handled = true;
+        throw customError;
+      }
       
       // Fetch user profile
       if (data.user) {
@@ -139,6 +143,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setIsLoading(true);
     
     try {
+      // Check if the profiles table exists
+      const { error: checkError } = await supabase
+        .from('profiles')
+        .select('id')
+        .limit(1);
+      
+      // If profiles table doesn't exist, create it
+      if (checkError && checkError.message.includes('does not exist')) {
+        console.log('Creating profiles table...');
+        
+        // Create profiles table using SQL
+        const { error: sqlError } = await supabase.rpc('create_profiles_table');
+        
+        if (sqlError) {
+          console.error('Error creating profiles table:', sqlError);
+          toast({
+            title: "Database setup error",
+            description: "Could not create profiles table. Please contact support.",
+            variant: "destructive",
+          });
+          throw sqlError;
+        }
+      }
+      
       // Sign up the user
       const { data, error } = await supabase.auth.signUp({
         email,

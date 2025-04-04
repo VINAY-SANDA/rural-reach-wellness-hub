@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks/use-auth';
 import { UserRole } from '@/types/database.types';
+import { toast } from '@/hooks/use-toast';
 
 const LoginPage = () => {
   const { login, isLoading } = useAuth();
@@ -35,11 +36,20 @@ const LoginPage = () => {
     e.preventDefault();
     
     try {
+      // For Supabase login, we don't need to pass the role here
+      // as it will be retrieved from the profile
       await login(credentials.email, credentials.password);
       // Navigation is handled in the login function
-    } catch (error) {
-      // Error handling is done in the login function
+    } catch (error: any) {
       console.error('Login error:', error);
+      // Check if the error was already handled in the login function
+      if (!error.handled) {
+        toast({
+          title: "Login failed",
+          description: error.message || "Please check your credentials and try again.",
+          variant: "destructive",
+        });
+      }
     }
   };
 

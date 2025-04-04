@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
@@ -39,8 +38,8 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { EyeOff, Eye, UserRound, Hospital, Users } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-
-type UserRole = 'patient' | 'doctor' | 'community';
+import { useAuth } from '@/hooks/use-auth';
+import { UserRole } from '@/types/database.types';
 
 // Schema for patient registration
 const patientSchema = z.object({
@@ -82,7 +81,7 @@ const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [userRole, setUserRole] = useState<UserRole>('patient');
-  const [isLoading, setIsLoading] = useState(false);
+  const { signup, isLoading } = useAuth();
 
   // Initialize forms for each role
   const patientForm = useForm<z.infer<typeof patientSchema>>({
@@ -135,49 +134,34 @@ const RegisterPage: React.FC = () => {
     setUserRole(newRole as UserRole);
   };
 
-  const onPatientSubmit = (data: z.infer<typeof patientSchema>) => {
-    handleRegistration(data, 'patient');
+  const onPatientSubmit = async (data: z.infer<typeof patientSchema>) => {
+    try {
+      await signup(data.email, data.password, 'patient', data.name);
+      // Signup function already handles redirection and toast notifications
+    } catch (error) {
+      console.error('Patient registration error:', error);
+      // Error is already handled in the signup function
+    }
   };
 
-  const onDoctorSubmit = (data: z.infer<typeof doctorSchema>) => {
-    handleRegistration(data, 'doctor');
+  const onDoctorSubmit = async (data: z.infer<typeof doctorSchema>) => {
+    try {
+      await signup(data.email, data.password, 'doctor', data.name);
+      // Signup function already handles redirection and toast notifications
+    } catch (error) {
+      console.error('Doctor registration error:', error);
+      // Error is already handled in the signup function
+    }
   };
 
-  const onCommunitySubmit = (data: z.infer<typeof communitySchema>) => {
-    handleRegistration(data, 'community');
-  };
-
-  const handleRegistration = (data: any, role: UserRole) => {
-    setIsLoading(true);
-
-    // Simulate API call
-    setTimeout(() => {
-      console.log('Registering with data:', data, 'and role:', role);
-      
-      // Store role in localStorage for demo purposes
-      localStorage.setItem('userRole', role);
-      localStorage.setItem('isLoggedIn', 'true');
-
-      toast({
-        title: "Registration successful",
-        description: `Your account has been created as a ${role}.`,
-      });
-
-      // Navigate based on role
-      switch (role) {
-        case 'patient':
-          navigate('/');
-          break;
-        case 'doctor':
-          navigate('/doctor-dashboard');
-          break;
-        case 'community':
-          navigate('/community-dashboard');
-          break;
-      }
-
-      setIsLoading(false);
-    }, 1500);
+  const onCommunitySubmit = async (data: z.infer<typeof communitySchema>) => {
+    try {
+      await signup(data.email, data.password, 'community', data.name);
+      // Signup function already handles redirection and toast notifications
+    } catch (error) {
+      console.error('Community registration error:', error);
+      // Error is already handled in the signup function
+    }
   };
 
   const renderRoleIcon = (role: UserRole) => {
