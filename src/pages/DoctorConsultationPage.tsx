@@ -160,7 +160,7 @@ const DoctorConsultationPage: React.FC = () => {
                 <SelectContent>
                   <SelectGroup>
                     <SelectLabel>Specialties</SelectLabel>
-                    <SelectItem value="">All Specialties</SelectItem>
+                    <SelectItem value="all">All Specialties</SelectItem>
                     <SelectItem value="General Physician">General Physician</SelectItem>
                     <SelectItem value="Pediatrician">Pediatrician</SelectItem>
                     <SelectItem value="Gynecologist">Gynecologist</SelectItem>
