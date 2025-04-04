@@ -18,6 +18,7 @@ import DoctorDashboard from "./pages/DoctorDashboard";
 import CommunityDashboard from "./pages/CommunityDashboard";
 import DoctorConsultationPage from "./pages/DoctorConsultationPage";
 import RegisterPage from "./pages/RegisterPage";
+import HealthProgramsPage from "./pages/HealthProgramsPage";
 import { useEffect, useState } from "react";
 
 const queryClient = new QueryClient();
@@ -100,6 +101,7 @@ const App = () => {
               }>
                 <Route path="/community-dashboard" element={<CommunityDashboard />} />
                 <Route path="/bulletin" element={<BulletinPage />} />
+                <Route path="/programs" element={<HealthProgramsPage />} />
               </Route>
               
               <Route path="*" element={<NotFound />} />
