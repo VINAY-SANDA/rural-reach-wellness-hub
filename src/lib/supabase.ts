@@ -9,30 +9,80 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 // Helper function to create database tables if they don't exist
 export const initializeDatabase = async () => {
   try {
-    // Check if the profiles table exists
-    const { error: checkError } = await supabase
-      .from('profiles')
-      .select('id')
-      .limit(1);
+    console.log('Checking and creating database tables...');
     
-    // If profiles table doesn't exist, create it
-    if (checkError && checkError.message.includes('does not exist')) {
-      console.log('Creating profiles table...');
+    // Create profiles table directly with SQL
+    const { error } = await supabase.from('profiles').select('count').limit(1).single();
+    
+    if (error && error.message.includes('does not exist')) {
+      console.log('Creating profiles table with SQL...');
       
-      // Create profiles table
-      const { error: createError } = await supabase.rpc('create_profiles_table');
+      // Use SQL to create the profiles table
+      const { error: sqlError } = await supabase.rpc('execute_sql', {
+        sql_query: `
+          CREATE TABLE IF NOT EXISTS profiles (
+            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+            user_id UUID REFERENCES auth.users(id) NOT NULL,
+            full_name TEXT,
+            avatar_url TEXT,
+            role TEXT CHECK (role IN ('patient', 'doctor', 'community')),
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+            email TEXT,
+            
+            -- Patient specific fields
+            age INTEGER,
+            gender TEXT,
+            medical_history TEXT,
+            allergies TEXT[],
+            medications TEXT[],
+            
+            -- Doctor specific fields
+            specialization TEXT,
+            qualification TEXT,
+            experience_years INTEGER,
+            license_number TEXT,
+            languages TEXT[],
+            consultation_schedule JSONB,
+            
+            -- Community specific fields
+            organization_name TEXT,
+            service_area TEXT[],
+            programs_offered TEXT[],
+            contact_number TEXT,
+            
+            UNIQUE(user_id)
+          );
+          
+          -- Enable RLS (Row Level Security)
+          ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+          
+          -- Create policy to allow users to read their own profile
+          CREATE POLICY "Users can view their own profile"
+            ON profiles FOR SELECT
+            USING (auth.uid() = user_id);
+          
+          -- Create policy to allow users to update their own profile
+          CREATE POLICY "Users can update their own profile"
+            ON profiles FOR UPDATE
+            USING (auth.uid() = user_id);
+        `
+      });
       
-      if (createError) {
-        console.error('Error creating profiles table:', createError);
+      if (sqlError) {
+        // If the execute_sql function doesn't exist, we'll need to guide the user
+        console.error('Error creating profiles table:', sqlError);
+        throw new Error('Supabase SQL execution failed. You may need to manually create the profiles table in the Supabase dashboard.');
       } else {
         console.log('Profiles table created successfully');
       }
+    } else {
+      console.log('Profiles table already exists, skipping creation');
     }
     
     console.log('Database initialization complete');
+    return true;
   } catch (error) {
     console.error('Error initializing database:', error);
+    return false;
   }
 };
-
-// Call this function when your app initializes
