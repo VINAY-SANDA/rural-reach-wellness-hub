@@ -21,48 +21,15 @@ import RegisterPage from "./pages/RegisterPage";
 import HealthProgramsPage from "./pages/HealthProgramsPage";
 import ProfilePage from "./pages/ProfilePage";
 import { useEffect, useState } from "react";
-import { supabase, initializeDatabase } from "./lib/supabase";
-import { toast } from "@/hooks/use-toast";
 
 const queryClient = new QueryClient();
 
-// AuthGuard component to handle protected routes
 const ProtectedRoute = ({ children, allowedRoles = null }: { children: React.ReactNode, allowedRoles?: string[] | null }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [userRole, setUserRole] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  // Check if user is authenticated using Supabase
+  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+  const userRole = localStorage.getItem('userRole');
   
-  useEffect(() => {
-    const checkAuth = async () => {
-      // Check if user is authenticated with Supabase
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (session) {
-        setIsAuthenticated(true);
-        
-        // Get user role from profile
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('user_id', session.user.id)
-          .single();
-        
-        if (profile) {
-          setUserRole(profile.role);
-        }
-      }
-      
-      setIsLoading(false);
-    };
-    
-    checkAuth();
-  }, []);
-  
-  if (isLoading) {
-    return <div className="flex justify-center items-center h-screen">Loading...</div>;
-  }
-  
-  if (!isAuthenticated) {
+  if (!isLoggedIn) {
     return <Navigate to="/login" replace />;
   }
   
@@ -82,52 +49,14 @@ const ProtectedRoute = ({ children, allowedRoles = null }: { children: React.Rea
 
 const App = () => {
   const [isInitialized, setIsInitialized] = useState(false);
-  const [initError, setInitError] = useState<string | null>(null);
   
   useEffect(() => {
-    // Initialize the database when the app starts
-    const init = async () => {
-      try {
-        const success = await initializeDatabase();
-        if (!success) {
-          setInitError("Failed to initialize database. Please check the console for details and ensure your Supabase project is properly set up.");
-        }
-        setIsInitialized(true);
-      } catch (error: any) {
-        console.error("Database initialization error:", error);
-        setInitError(error.message || "Failed to initialize database");
-        setIsInitialized(true); // Still set initialized to true so the app can load
-      }
-    };
-    
-    init();
+    // Check for stored authentication data on initial load
+    setIsInitialized(true);
   }, []);
   
   if (!isInitialized) {
-    return <div className="flex justify-center items-center h-screen">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-wellness-600 mx-auto"></div>
-        <p className="mt-4 text-lg">Initializing application...</p>
-      </div>
-    </div>;
-  }
-
-  if (initError) {
-    return <div className="flex justify-center items-center h-screen">
-      <div className="text-center max-w-md mx-auto p-6 bg-red-50 rounded-lg border border-red-200">
-        <h2 className="text-2xl font-bold text-red-700 mb-4">Database Setup Error</h2>
-        <p className="text-red-600 mb-4">{initError}</p>
-        <div className="text-sm text-gray-700 mt-4 p-4 bg-white rounded border">
-          <p className="font-semibold">Troubleshooting steps:</p>
-          <ol className="list-decimal pl-5 mt-2 space-y-1 text-left">
-            <li>Go to your Supabase dashboard</li>
-            <li>Navigate to the SQL Editor</li>
-            <li>Create the profiles table manually</li>
-            <li>Refresh this page</li>
-          </ol>
-        </div>
-      </div>
-    </div>;
+    return null; // Or a loading spinner
   }
 
   return (
