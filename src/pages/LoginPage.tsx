@@ -1,30 +1,22 @@
 
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, User, Lock, MailIcon, UserRound, Hospital, Users } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Eye, EyeOff, MailIcon, UserRound, Hospital, Users, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { toast } from '@/hooks/use-toast';
-
-type UserRole = 'patient' | 'doctor' | 'community';
-
-interface LoginCredentials {
-  email: string;
-  password: string;
-  role: UserRole;
-}
+import { useAuth } from '@/hooks/use-auth';
+import { UserRole } from '@/types/database.types';
 
 const LoginPage = () => {
-  const navigate = useNavigate();
+  const { login, isLoading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
-  const [credentials, setCredentials] = useState<LoginCredentials>({
+  const [credentials, setCredentials] = useState({
     email: '',
     password: '',
-    role: 'patient',
+    role: 'patient' as UserRole,
   });
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleRoleChange = (role: UserRole) => {
     setCredentials({ ...credentials, role });
@@ -41,41 +33,13 @@ const LoginPage = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-
+    
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // For demo purposes, always succeed
-      localStorage.setItem('userRole', credentials.role);
-      localStorage.setItem('isLoggedIn', 'true');
-      
-      toast({
-        title: "Login successful",
-        description: `Welcome back! You are logged in as a ${credentials.role}.`,
-      });
-
-      // Navigate based on role
-      switch (credentials.role) {
-        case 'patient':
-          navigate('/');
-          break;
-        case 'doctor':
-          navigate('/doctor-dashboard');
-          break;
-        case 'community':
-          navigate('/community-dashboard');
-          break;
-      }
+      await login(credentials.email, credentials.password);
+      // Navigation is handled in the login function
     } catch (error) {
-      toast({
-        title: "Login failed",
-        description: "Please check your credentials and try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
+      // Error handling is done in the login function
+      console.error('Login error:', error);
     }
   };
 

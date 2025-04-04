@@ -19,11 +19,13 @@ import CommunityDashboard from "./pages/CommunityDashboard";
 import DoctorConsultationPage from "./pages/DoctorConsultationPage";
 import RegisterPage from "./pages/RegisterPage";
 import HealthProgramsPage from "./pages/HealthProgramsPage";
+import ProfilePage from "./pages/ProfilePage";
 import { useEffect, useState } from "react";
 
 const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children, allowedRoles = null }: { children: React.ReactNode, allowedRoles?: string[] | null }) => {
+  // Check if user is authenticated using Supabase
   const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
   const userRole = localStorage.getItem('userRole');
   
@@ -81,6 +83,7 @@ const App = () => {
                 <Route path="/community" element={<CommunityPage />} />
                 <Route path="/bulletin" element={<BulletinPage />} />
                 <Route path="/consultation" element={<DoctorConsultationPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
               </Route>
               
               {/* Doctor Routes */}
@@ -91,6 +94,7 @@ const App = () => {
               }>
                 <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
                 <Route path="/chat" element={<ChatPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
               </Route>
               
               {/* Community Admin Routes */}
@@ -102,6 +106,7 @@ const App = () => {
                 <Route path="/community-dashboard" element={<CommunityDashboard />} />
                 <Route path="/bulletin" element={<BulletinPage />} />
                 <Route path="/programs" element={<HealthProgramsPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
               </Route>
               
               <Route path="*" element={<NotFound />} />

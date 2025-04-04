@@ -11,10 +11,12 @@ import {
   CalendarClock, 
   LayoutDashboard,
   ClipboardList,
-  BookOpen
+  BookOpen,
+  UserCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/use-auth';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -29,12 +31,7 @@ type NavigationItem = {
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
   const location = useLocation();
-  const [userRole, setUserRole] = useState<string | null>(null);
-  
-  useEffect(() => {
-    const role = localStorage.getItem('userRole');
-    setUserRole(role);
-  }, []);
+  const { userRole } = useAuth();
   
   const navigationItems: NavigationItem[] = [
     { name: 'Patient Dashboard', path: '/', icon: Home, roles: ['patient'] },
@@ -47,7 +44,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
     { name: 'Community', path: '/community', icon: Users, roles: ['patient'] },
     { name: 'Health Bulletin', path: '/bulletin', icon: FileText, roles: ['patient', 'community'] },
     { name: 'Patient Records', path: '/records', icon: ClipboardList, roles: ['doctor'] },
-    { name: 'Health Programs', path: '/programs', icon: BookOpen, roles: ['community'] }
+    { name: 'Health Programs', path: '/programs', icon: BookOpen, roles: ['community'] },
+    { name: 'My Profile', path: '/profile', icon: UserCircle, roles: ['patient', 'doctor', 'community'] }
   ];
 
   // Filter navigation items based on user role
