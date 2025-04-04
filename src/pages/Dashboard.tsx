@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, PillIcon, Users, FileText, Mic, Activity } from 'lucide-react';
+import { MessageSquare, PillIcon, Users, FileText, Mic, CalendarClock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Dashboard: React.FC = () => {
@@ -43,10 +43,10 @@ const Dashboard: React.FC = () => {
       color: 'bg-rose-100 text-rose-700'
     },
     {
-      title: 'Health Vitals',
-      description: 'Track your health metrics and see progress over time.',
-      icon: Activity,
-      link: '/vitals',
+      title: 'Doctor Consultation',
+      description: 'Book consultations with qualified doctors near you.',
+      icon: CalendarClock,
+      link: '/consultation',
       color: 'bg-purple-100 text-purple-700'
     }
   ];

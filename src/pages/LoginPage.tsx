@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, User, Lock, MailIcon, UserRound, Hospital, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -62,10 +62,10 @@ const LoginPage = () => {
           navigate('/');
           break;
         case 'doctor':
-          navigate('/chat');
+          navigate('/doctor-dashboard');
           break;
         case 'community':
-          navigate('/community');
+          navigate('/community-dashboard');
           break;
       }
     } catch (error) {
@@ -144,8 +144,11 @@ const LoginPage = () => {
                       value={credentials.email}
                       onChange={handleInputChange}
                       required
-                      icon={<MailIcon className="w-5 h-5" />}
+                      className="pl-10 relative"
                     />
+                    <div className="absolute -mt-9 ml-3 text-muted-foreground">
+                      <MailIcon className="w-5 h-5" />
+                    </div>
                   </div>
                   <div className="space-y-2 relative">
                     <Input
@@ -155,8 +158,11 @@ const LoginPage = () => {
                       value={credentials.password}
                       onChange={handleInputChange}
                       required
-                      icon={<Lock className="w-5 h-5" />}
+                      className="pl-10"
                     />
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                      <Lock className="w-5 h-5" />
+                    </div>
                     <Button
                       type="button"
                       variant="ghost"
@@ -191,8 +197,11 @@ const LoginPage = () => {
                       value={credentials.email}
                       onChange={handleInputChange}
                       required
-                      icon={<MailIcon className="w-5 h-5" />}
+                      className="pl-10"
                     />
+                    <div className="absolute -mt-9 ml-3 text-muted-foreground">
+                      <MailIcon className="w-5 h-5" />
+                    </div>
                   </div>
                   <div className="space-y-2 relative">
                     <Input
@@ -202,8 +211,11 @@ const LoginPage = () => {
                       value={credentials.password}
                       onChange={handleInputChange}
                       required
-                      icon={<Lock className="w-5 h-5" />}
+                      className="pl-10"
                     />
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                      <Lock className="w-5 h-5" />
+                    </div>
                     <Button
                       type="button"
                       variant="ghost"
@@ -238,8 +250,11 @@ const LoginPage = () => {
                       value={credentials.email}
                       onChange={handleInputChange}
                       required
-                      icon={<MailIcon className="w-5 h-5" />}
+                      className="pl-10"
                     />
+                    <div className="absolute -mt-9 ml-3 text-muted-foreground">
+                      <MailIcon className="w-5 h-5" />
+                    </div>
                   </div>
                   <div className="space-y-2 relative">
                     <Input
@@ -249,8 +264,11 @@ const LoginPage = () => {
                       value={credentials.password}
                       onChange={handleInputChange}
                       required
-                      icon={<Lock className="w-5 h-5" />}
+                      className="pl-10"
                     />
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                      <Lock className="w-5 h-5" />
+                    </div>
                     <Button
                       type="button"
                       variant="ghost"
@@ -284,9 +302,9 @@ const LoginPage = () => {
             </div>
             <div className="text-center text-sm">
               Don't have an account?{" "}
-              <a href="#" className="text-wellness-600 hover:text-wellness-800">
+              <Link to="/register" className="text-wellness-600 hover:text-wellness-800">
                 Register here
-              </a>
+              </Link>
             </div>
           </CardFooter>
         </Card>

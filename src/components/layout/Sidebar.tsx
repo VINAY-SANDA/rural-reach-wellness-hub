@@ -1,7 +1,18 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, MessageSquare, PillIcon, Users, FileText, Mic } from 'lucide-react';
+import { 
+  Home, 
+  MessageSquare, 
+  PillIcon, 
+  Users, 
+  FileText, 
+  Mic, 
+  CalendarClock, 
+  LayoutDashboard,
+  ClipboardList,
+  BookOpen
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
@@ -9,17 +20,40 @@ interface SidebarProps {
   isOpen: boolean;
 }
 
+type NavigationItem = {
+  name: string;
+  path: string;
+  icon: React.ElementType;
+  roles: string[];
+};
+
 const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
   const location = useLocation();
+  const [userRole, setUserRole] = useState<string | null>(null);
   
-  const navigationItems = [
-    { name: 'Dashboard', path: '/', icon: Home },
-    { name: 'AI Health Chat', path: '/chat', icon: MessageSquare },
-    { name: 'Voice Assistant', path: '/voice', icon: Mic },
-    { name: 'Medications', path: '/medications', icon: PillIcon },
-    { name: 'Community', path: '/community', icon: Users },
-    { name: 'Health Bulletin', path: '/bulletin', icon: FileText },
+  useEffect(() => {
+    const role = localStorage.getItem('userRole');
+    setUserRole(role);
+  }, []);
+  
+  const navigationItems: NavigationItem[] = [
+    { name: 'Patient Dashboard', path: '/', icon: Home, roles: ['patient'] },
+    { name: 'Doctor Dashboard', path: '/doctor-dashboard', icon: LayoutDashboard, roles: ['doctor'] },
+    { name: 'Community Dashboard', path: '/community-dashboard', icon: LayoutDashboard, roles: ['community'] },
+    { name: 'AI Health Chat', path: '/chat', icon: MessageSquare, roles: ['patient', 'doctor'] },
+    { name: 'Voice Assistant', path: '/voice', icon: Mic, roles: ['patient'] },
+    { name: 'Medications', path: '/medications', icon: PillIcon, roles: ['patient'] },
+    { name: 'Doctor Consultation', path: '/consultation', icon: CalendarClock, roles: ['patient'] },
+    { name: 'Community', path: '/community', icon: Users, roles: ['patient'] },
+    { name: 'Health Bulletin', path: '/bulletin', icon: FileText, roles: ['patient', 'community'] },
+    { name: 'Patient Records', path: '/records', icon: ClipboardList, roles: ['doctor'] },
+    { name: 'Health Programs', path: '/programs', icon: BookOpen, roles: ['community'] }
   ];
+
+  // Filter navigation items based on user role
+  const filteredNavItems = navigationItems.filter(item => 
+    !userRole || item.roles.includes(userRole)
+  );
 
   return (
     <aside className={cn(
@@ -37,7 +71,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
         
         <nav className="flex-1 overflow-y-auto p-4">
           <ul className="space-y-2">
-            {navigationItems.map((item) => {
+            {filteredNavItems.map((item) => {
               const isActive = location.pathname === item.path;
               const Icon = item.icon;
               
