@@ -4,7 +4,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/use-auth";
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 
 const RegisterPage = () => {
   const [email, setEmail] = useState("");
